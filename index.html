@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
     <style>
         :root {
@@ -33,6 +33,9 @@
             --display: 'Space Grotesk', sans-serif;
             --mono: 'IBM Plex Mono', monospace;
             --body: 'Inter', sans-serif;
+            --cursor-accent: var(--brass-bright);
+            --cursor-ring-size: 44px;
+            --cursor-dot-size: 8px;
         }
 
         /* Light theme — "print" mode: same blueprint system, inked on paper instead of a night drafting table */
@@ -50,6 +53,7 @@
             --card: #ffffff;
             --card-border: rgba(147, 97, 28, 0.25);
             --nav-bg: rgba(238, 241, 246, 0.86);
+            --cursor-accent: var(--brass);
         }
 
         * {
@@ -84,6 +88,93 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             transition: background-color .35s ease, color .35s ease;
+        }
+
+        /* ---------- CUSTOM CURSOR ---------- */
+        .custom-cursor {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        html.custom-cursor-on,
+        html.custom-cursor-on * {
+            cursor: none !important;
+        }
+
+        .custom-cursor-dot,
+        .custom-cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 50%;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .custom-cursor-dot {
+            width: var(--cursor-dot-size);
+            height: var(--cursor-dot-size);
+            margin-top: calc(var(--cursor-dot-size) / -2);
+            margin-left: calc(var(--cursor-dot-size) / -2);
+            background: var(--cursor-accent);
+            z-index: 2;
+            opacity: 0;
+            transition: width .2s ease, height .2s ease, margin .2s ease, background-color .35s ease, opacity .15s ease;
+        }
+
+        .custom-cursor-ring {
+            width: var(--cursor-ring-size);
+            height: var(--cursor-ring-size);
+            margin-top: calc(var(--cursor-ring-size) / -2);
+            margin-left: calc(var(--cursor-ring-size) / -2);
+            border: 2px solid var(--cursor-accent);
+            background: transparent;
+            z-index: 1;
+            opacity: 0;
+            transition: width .25s ease, height .25s ease, margin .25s ease, border-color .35s ease, opacity .2s ease;
+        }
+
+        .custom-cursor.is-visible .custom-cursor-dot,
+        .custom-cursor.is-visible .custom-cursor-ring {
+            opacity: 1;
+        }
+
+        .custom-cursor.is-hover .custom-cursor-dot {
+            --cursor-dot-size: 10px;
+        }
+
+        .custom-cursor.is-hover .custom-cursor-ring {
+            --cursor-ring-size: 56px;
+            opacity: 0.75;
+        }
+
+        .custom-cursor.is-down .custom-cursor-ring {
+            --cursor-ring-size: 36px;
+            opacity: 1;
+        }
+
+        @media (hover: none), (pointer: coarse) {
+            .custom-cursor {
+                display: none !important;
+            }
+
+            html.custom-cursor-on,
+            html.custom-cursor-on * {
+                cursor: auto !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .custom-cursor {
+                display: none !important;
+            }
+
+            html.custom-cursor-on,
+            html.custom-cursor-on * {
+                cursor: auto !important;
+            }
         }
 
         a {
@@ -340,8 +431,274 @@
         }
 
         .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(280px, 420px);
+            gap: 40px 64px;
+            align-items: center;
+        }
+
+        .hero-copy {
+            max-width: 580px;
+        }
+
+        .hero-visual {
+            position: relative;
+            justify-self: end;
+            width: 100%;
+            max-width: 460px;
+        }
+
+        .hero-visual-frame {
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 18px 18px 14px;
+            position: relative;
+            overflow: hidden;
+            animation: heroVisualFloat 6s ease-in-out infinite;
+        }
+
+        .hero-visual-frame::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 20px 20px,
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 20px 20px;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .hero-visual-cap {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            color: var(--ink-dim);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-visual-svg {
+            width: 100%;
+            height: auto;
             display: block;
-            max-width: 680px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-visual-svg .hero-ring {
+            fill: none;
+            stroke-width: 1;
+            transform-origin: 200px 200px;
+        }
+
+        .hero-visual-svg .hero-ring-1 {
+            stroke: var(--grid-strong);
+            stroke-dasharray: 3 9;
+            animation: heroSpin 28s linear infinite;
+        }
+
+        .hero-visual-svg .hero-ring-2 {
+            stroke: var(--brass);
+            stroke-opacity: 0.45;
+            stroke-dasharray: 2 7;
+            animation: heroSpinRev 18s linear infinite;
+        }
+
+        .hero-visual-svg .hero-ring-3 {
+            stroke: var(--teal);
+            stroke-opacity: 0.55;
+            stroke-dasharray: 5 5;
+            animation: heroSpin 12s linear infinite;
+        }
+
+        .hero-visual-svg .hero-axis {
+            stroke: var(--grid-strong);
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+
+        .hero-visual-svg .hero-link {
+            fill: none;
+            stroke: var(--brass);
+            stroke-width: 1;
+            stroke-opacity: 0.35;
+            stroke-dasharray: 4 8;
+            animation: heroDashFlow 2.4s linear infinite;
+        }
+
+        .hero-visual-svg .hero-hub-group {
+            transform-origin: 200px 200px;
+            animation: heroHubPulse 3s ease-in-out infinite;
+        }
+
+        .hero-visual-svg .hero-hub {
+            fill: var(--card);
+            stroke: var(--brass);
+            stroke-width: 2;
+        }
+
+        .hero-visual-svg .hero-hub-inner {
+            fill: var(--brass);
+            fill-opacity: 0.12;
+        }
+
+        .hero-visual-svg .hero-node-ring {
+            fill: var(--paper-2);
+            stroke: var(--grid-strong);
+            stroke-width: 1;
+        }
+
+        .hero-visual-svg .hero-node-ring.is-teal {
+            stroke: var(--teal);
+            stroke-opacity: 0.75;
+        }
+
+        .hero-visual-svg .hero-node-ring.is-brass {
+            stroke: var(--brass);
+            stroke-opacity: 0.75;
+        }
+
+        .hero-visual-svg .hero-node-dot {
+            fill: var(--brass-bright);
+            animation: heroNodeBlink 2.8s ease-in-out infinite;
+        }
+
+        .hero-visual-svg .hero-label-orbit {
+            font-size: 7.5px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .hero-visual-svg .hero-label-orbit tspan {
+            font-size: 7.5px;
+            font-weight: 600;
+        }
+
+        .hero-visual-svg .hero-orbit-dot {
+            fill: var(--brass-bright);
+            filter: drop-shadow(0 0 6px rgba(211, 162, 92, 0.55));
+        }
+
+        .hero-visual-svg .hero-orbit-group {
+            transform-origin: 200px 200px;
+            animation: heroSpin 8s linear infinite;
+        }
+
+        .hero-visual-svg .hero-orbit-group-slow {
+            transform-origin: 200px 200px;
+            animation: heroSpinRev 14s linear infinite;
+        }
+
+        .hero-visual-svg .hero-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            fill: var(--ink-dim);
+            letter-spacing: 0.04em;
+        }
+
+        .hero-visual-svg .hero-label-strong {
+            fill: var(--brass-bright);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .hero-visual-svg .hero-hub-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        .hero-visual-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-visual-tags span {
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--ink-dim);
+            border: 1px solid var(--grid-strong);
+            padding: 5px 10px;
+            border-radius: var(--radius);
+            animation: heroTagPulse 4s ease-in-out infinite;
+        }
+
+        .hero-visual-tags span:nth-child(2) { animation-delay: 0.8s; }
+        .hero-visual-tags span:nth-child(3) { animation-delay: 1.6s; }
+        .hero-visual-tags span:nth-child(4) { animation-delay: 2.4s; }
+        .hero-visual-tags span:nth-child(5) { animation-delay: 3.2s; }
+
+        @keyframes heroSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes heroSpinRev {
+            to { transform: rotate(-360deg); }
+        }
+
+        @keyframes heroDashFlow {
+            to { stroke-dashoffset: -48; }
+        }
+
+        @keyframes heroHubPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        @keyframes heroNodeBlink {
+            0%, 100% { opacity: 0.35; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes heroVisualFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes heroTagPulse {
+            0%, 100% { border-color: var(--grid-strong); color: var(--ink-dim); }
+            50% { border-color: var(--brass); color: var(--brass-bright); }
+        }
+
+        @media (max-width: 960px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-copy {
+                max-width: none;
+            }
+
+            .hero-visual {
+                justify-self: center;
+                max-width: min(100%, 380px);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-visual-frame,
+            .hero-visual-svg .hero-ring,
+            .hero-visual-svg .hero-link,
+            .hero-visual-svg .hero-hub-group,
+            .hero-visual-svg .hero-node-dot,
+            .hero-visual-svg .hero-orbit-group,
+            .hero-visual-svg .hero-orbit-group-slow,
+            .hero-visual-tags span {
+                animation: none !important;
+            }
         }
 
         .hero-flow {
@@ -474,6 +831,10 @@
             pointer-events: none;
         }
 
+        .career-flow-svg-wrap--vertical {
+            display: none;
+        }
+
         .career-flow-svg-wrap svg {
             width: 100%;
             height: 100%;
@@ -481,7 +842,8 @@
             overflow: visible;
         }
 
-        #careerSquiggle {
+        #careerSquiggle,
+        #careerSquiggleVertical {
             fill: none;
             stroke: var(--ink-faint);
             stroke-width: 1.5;
@@ -491,12 +853,14 @@
             opacity: 0.55;
         }
 
-        #careerMarker {
+        #careerMarker,
+        #careerMarkerVertical {
             fill: var(--brass);
             opacity: 0;
         }
 
-        .schematic-box.in #careerMarker {
+        .schematic-box.in #careerMarker,
+        .schematic-box.in #careerMarkerVertical {
             opacity: 0.9;
         }
 
@@ -680,31 +1044,118 @@
         }
 
         @media (max-width: 1024px) {
-            .career-flow-row {
-                grid-template-columns: repeat(3, 1fr);
-                row-gap: 36px;
+            .schematic-box {
+                padding: 24px 16px 28px;
             }
 
-            .career-flow-svg-wrap,
+            .career-flow-svg-wrap:not(.career-flow-svg-wrap--vertical),
             .box-loader {
                 display: none;
             }
-        }
 
-        @media (max-width: 640px) {
+            .career-flow-svg-wrap--vertical {
+                display: block;
+                top: 72px;
+                bottom: 32px;
+                left: 28px;
+                transform: none;
+                width: 48px;
+                height: auto;
+            }
+
             .career-flow-row {
-                grid-template-columns: 1fr;
-                gap: 28px;
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+                padding-left: 72px;
+            }
+
+            .work-process {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 18px;
+                text-align: left;
+                padding: 18px 0;
+            }
+
+            .step-num-box {
+                margin-bottom: 0;
+                flex-shrink: 0;
             }
 
             .step-icon {
-                width: 88px;
-                height: 88px;
+                width: 76px;
+                height: 76px;
             }
 
             .step-icon svg {
                 width: 28px;
                 height: 28px;
+            }
+
+            .step-num {
+                width: 32px;
+                height: 32px;
+                line-height: 32px;
+                font-size: 11px;
+            }
+
+            .step-desc {
+                text-align: left;
+                flex: 1;
+                min-width: 0;
+            }
+
+            .step-desc h4 {
+                font-size: 12px;
+            }
+
+            .step-desc .step-org {
+                font-size: 9px;
+            }
+
+            .step-desc p {
+                font-size: 10px;
+            }
+
+            #careerSquiggleVertical {
+                stroke-dashoffset: 120;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .career-flow-svg-wrap--vertical {
+                left: 22px;
+                width: 40px;
+            }
+
+            .career-flow-row {
+                padding-left: 58px;
+            }
+
+            .work-process {
+                gap: 14px;
+                padding: 16px 0;
+            }
+
+            .step-icon {
+                width: 64px;
+                height: 64px;
+            }
+
+            .step-icon svg {
+                width: 24px;
+                height: 24px;
+            }
+
+            .step-num {
+                width: 28px;
+                height: 28px;
+                line-height: 28px;
+                font-size: 10px;
+                top: -2px;
+                right: -2px;
             }
         }
 
@@ -1374,6 +1825,11 @@
 
 <body>
 
+    <div id="customCursor" class="custom-cursor" aria-hidden="true">
+        <div class="custom-cursor-ring"></div>
+        <div class="custom-cursor-dot"></div>
+    </div>
+
     <header class="nav">
         <div class="nav-inner">
             <a href="#top" class="logo"><span class="dot"></span>Jignesh.Dev</a>
@@ -1424,7 +1880,7 @@
         <!-- HERO -->
         <section class="hero">
             <div class="wrap hero-grid">
-                <div>
+                <div class="hero-copy">
                     <div class="eyebrow">Ahmedabad, India — Available for lead &amp; PM roles</div>
                     <h1>I build systems.<br>Now I lead the <span class="accent">people</span><br>who build them.</h1>
                     <p class="hero-sub">Jignesh Tiwari — Laravel developer with 4+ years shipping scalable web and
@@ -1433,7 +1889,7 @@
                     <div class="hero-meta">
                         <span>📍 Ahmedabad, Gujarat</span>
                         <span class="sep"></span>
-                        <span>🕓 4+ yrs / Laravel &amp; PHP</span>
+                        <span>🕓 4+ yrs / IN Technology Team Lead | Product Development | Technical Leadership | Research, Planning & Execution</span>
                         <span class="sep"></span>
                         <span>👥 Leading a 15+ engineer team</span>
                     </div>
@@ -1442,6 +1898,43 @@
                         <a class="btn btn-ghost" href="#experience">See the track record</a>
                     </div>
                 </div>
+
+                <aside class="hero-visual reveal" aria-hidden="true">
+                    <div class="hero-visual-frame">
+                        <div class="hero-visual-cap">
+                            <span>FIG. 00 — SYSTEMS MAP</span>
+                            <span>LIVE</span>
+                        </div>
+                        <svg class="hero-visual-svg" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle class="hero-ring hero-ring-1" cx="200" cy="200" r="168" />
+                            <circle class="hero-ring hero-ring-2" cx="200" cy="200" r="128" />
+                            <circle class="hero-ring hero-ring-3" cx="200" cy="200" r="88" />
+                            <g id="heroOrbitLinks"></g>
+                            <g class="hero-orbit-group">
+                                <circle class="hero-orbit-dot" cx="200" cy="32" r="5" />
+                            </g>
+                            <g class="hero-orbit-group-slow">
+                                <circle class="hero-orbit-dot" cx="328" cy="200" r="4" fill="var(--teal)" />
+                            </g>
+                            <g id="heroOrbitNodes"></g>
+                            <g class="hero-hub-group">
+                                <circle class="hero-hub-inner" cx="200" cy="200" r="36" />
+                                <circle class="hero-hub" cx="200" cy="200" r="30" />
+                                <text class="hero-label hero-label-strong hero-hub-label" x="200" y="198" text-anchor="middle">
+                                    <tspan x="200" dy="0">Team</tspan>
+                                    <tspan x="200" dy="12">Lead</tspan>
+                                </text>
+                            </g>
+                        </svg>
+                        <div class="hero-visual-tags">
+                            <span>TECH LEAD</span>
+                            <span>SOLUTION ARCHITECTURE</span>
+                            <span>TEAM MANAGEMENT</span>
+                            <span>PROJECT MANAGEMENT</span>
+                            <span>DEVELOPMENT</span>
+                        </div>
+                    </div>
+                </aside>
             </div>
 
             <div class="wrap hero-flow">
@@ -1454,6 +1947,14 @@
                             <path id="careerSquiggle"
                                 d="M62.9 14.9c-25-7.74-56.6 4.8-60.4 24.3-3.73 19.6 21.6 35 39.6 37.6 42.8 6.2 72.9-53.4 116-58.9 65-18.2 191 101 215 28.8 5-16.7-7-49.1-34-44-34 11.5-31 46.5-14 69.3 9.38 12.6 24.2 20.6 39.8 22.9 91.4 9.05 102-98.9 176-86.7 18.8 3.81 33 17.3 36.7 34.6 2.01 10.2.124 21.1-5.18 30.1" />
                             <polygon id="careerMarker" points="0,30 15,0 30,30" />
+                        </svg>
+                    </div>
+
+                    <div class="career-flow-svg-wrap career-flow-svg-wrap--vertical" aria-hidden="true">
+                        <svg id="careerFlowSvgVertical" viewBox="0 0 60 520" preserveAspectRatio="none">
+                            <path id="careerSquiggleVertical"
+                                d="M30 8c14 28-18 52 0 88 16 32 14 58-2 88-18 34-12 72 2 104 14 30 10 64-4 94-12 26-8 58 4 82 10 20 6 44-2 56" />
+                            <polygon id="careerMarkerVertical" points="0,30 15,0 30,30" />
                         </svg>
                     </div>
 
@@ -1593,7 +2094,7 @@
                         <div class="stat-grid reveal">
                             <div class="stat">
                                 <div class="num">4+</div>
-                                <div class="lbl">YEARS IN LARAVEL / PHP</div>
+                                <div class="lbl">YEARS IN Technology Team Lead | Product Development | Technical Leadership | Research, Planning & Execution</div>
                             </div>
                             <div class="stat">
                                 <div class="num">9</div>
@@ -2033,6 +2534,153 @@
     </footer>
 
     <script>
+        // custom cursor — dot + trailing ring (theme accent)
+        (function initCustomCursor() {
+            const canUse = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+                && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!canUse) return;
+
+            const html = document.documentElement;
+            const cursor = document.getElementById('customCursor');
+            const dot = cursor && cursor.querySelector('.custom-cursor-dot');
+            const ring = cursor && cursor.querySelector('.custom-cursor-ring');
+            if (!cursor || !dot || !ring) return;
+
+            html.classList.add('custom-cursor-on');
+
+            let mx = -100;
+            let my = -100;
+            let rx = -100;
+            let ry = -100;
+            const hoverSel = 'a, button, .btn, input, textarea, select, label, [role="button"]';
+
+            function setPos(el, x, y) {
+                el.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+            }
+
+            function tick() {
+                rx += (mx - rx) * 0.14;
+                ry += (my - ry) * 0.14;
+                setPos(ring, rx, ry);
+                requestAnimationFrame(tick);
+            }
+
+            document.addEventListener('mousemove', (e) => {
+                mx = e.clientX;
+                my = e.clientY;
+                setPos(dot, mx, my);
+                cursor.classList.add('is-visible');
+            });
+
+            document.addEventListener('mouseleave', () => {
+                cursor.classList.remove('is-visible');
+            });
+
+            document.addEventListener('mouseover', (e) => {
+                if (e.target.closest(hoverSel)) cursor.classList.add('is-hover');
+                else cursor.classList.remove('is-hover');
+            });
+
+            document.addEventListener('mousedown', () => cursor.classList.add('is-down'));
+            document.addEventListener('mouseup', () => cursor.classList.remove('is-down'));
+
+            requestAnimationFrame(tick);
+        })();
+
+        // FIG. 00 — orbit nodes from skills list
+        (function initHeroSystemsMap() {
+            const linksG = document.getElementById('heroOrbitLinks');
+            const nodesG = document.getElementById('heroOrbitNodes');
+            if (!linksG || !nodesG) return;
+
+            const cx = 200;
+            const cy = 200;
+            const nodeR = 118;
+            const labelR = 150;
+            const ringSize = 12;
+            const svgNs = 'http://www.w3.org/2000/svg';
+            const items = [
+                'Laravel Expert',
+                'Architecture',
+                'Project Manager',
+                'FinTech Solutions',
+                'Business Logic',
+                'Leadership',
+                'Strategy',
+                'Development',
+                'Execution',
+                'Delivery',
+                'Technical Lead',
+                'Solution Design'
+            ];
+
+            function splitLabel(text) {
+                const words = text.split(' ');
+                if (words.length < 2) return [text];
+                const mid = Math.ceil(words.length / 2);
+                return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+            }
+
+            items.forEach((label, i) => {
+                const angle = -Math.PI / 2 + i * (2 * Math.PI / items.length);
+                const nx = cx + nodeR * Math.cos(angle);
+                const ny = cy + nodeR * Math.sin(angle);
+                const lx = cx + labelR * Math.cos(angle);
+                const ly = cy + labelR * Math.sin(angle);
+
+                const link = document.createElementNS(svgNs, 'line');
+                link.setAttribute('class', 'hero-link');
+                link.setAttribute('x1', String(cx));
+                link.setAttribute('y1', String(cy));
+                link.setAttribute('x2', String(nx));
+                link.setAttribute('y2', String(ny));
+                link.style.animationDelay = (i * 0.12) + 's';
+                linksG.appendChild(link);
+
+                const g = document.createElementNS(svgNs, 'g');
+
+                const ring = document.createElementNS(svgNs, 'circle');
+                ring.setAttribute('class', 'hero-node-ring ' + (i % 2 === 0 ? 'is-brass' : 'is-teal'));
+                ring.setAttribute('cx', String(nx));
+                ring.setAttribute('cy', String(ny));
+                ring.setAttribute('r', String(ringSize));
+
+                const dot = document.createElementNS(svgNs, 'circle');
+                dot.setAttribute('class', 'hero-node-dot');
+                dot.setAttribute('cx', String(nx));
+                dot.setAttribute('cy', String(ny));
+                dot.setAttribute('r', '2.5');
+                dot.style.animationDelay = (i * 0.2) + 's';
+                if (i % 2 === 1) dot.setAttribute('fill', 'var(--teal)');
+
+                const text = document.createElementNS(svgNs, 'text');
+                text.setAttribute('class', 'hero-label hero-label-orbit');
+                text.setAttribute('x', String(lx));
+                text.setAttribute('text-anchor', 'middle');
+
+                const parts = splitLabel(label);
+                if (parts.length === 1) {
+                    text.setAttribute('y', String(ly));
+                    text.setAttribute('dominant-baseline', 'middle');
+                    text.textContent = label;
+                } else {
+                    text.setAttribute('y', String(ly - 5));
+                    parts.forEach((part, pi) => {
+                        const tspan = document.createElementNS(svgNs, 'tspan');
+                        tspan.setAttribute('x', String(lx));
+                        tspan.setAttribute('dy', pi === 0 ? '0' : '9');
+                        tspan.textContent = part;
+                        text.appendChild(tspan);
+                    });
+                }
+
+                g.appendChild(ring);
+                g.appendChild(dot);
+                g.appendChild(text);
+                nodesG.appendChild(g);
+            });
+        })();
+
         // theme toggle — dark (default) <-> light, kept in memory for this session
         const root = document.documentElement;
         const themeToggle = document.getElementById('themeToggle');
@@ -2077,19 +2725,50 @@
         }, { threshold: 0.12 });
         revealEls.forEach(el => io.observe(el));
 
-        // shamim539-style squiggle + marker — infinite loop
+        // shamim539-style squiggle + marker — infinite loop (horizontal desktop / vertical mobile)
         let careerFlowLoopId = null;
+
+        function stopCareerFlow() {
+            if (careerFlowLoopId !== null) {
+                cancelAnimationFrame(careerFlowLoopId);
+                careerFlowLoopId = null;
+            }
+        }
+
+        function getActiveCareerPath() {
+            const horizontalWrap = document.querySelector('.career-flow-svg-wrap:not(.career-flow-svg-wrap--vertical)');
+            const verticalWrap = document.querySelector('.career-flow-svg-wrap--vertical');
+
+            if (horizontalWrap && getComputedStyle(horizontalWrap).display !== 'none') {
+                return {
+                    path: document.getElementById('careerSquiggle'),
+                    marker: document.getElementById('careerMarker'),
+                    dashBase: 180,
+                    dashRange: 170
+                };
+            }
+
+            if (verticalWrap && getComputedStyle(verticalWrap).display !== 'none') {
+                return {
+                    path: document.getElementById('careerSquiggleVertical'),
+                    marker: document.getElementById('careerMarkerVertical'),
+                    dashBase: 120,
+                    dashRange: 110
+                };
+            }
+
+            return null;
+        }
+
         function animateCareerFlow() {
-            if (careerFlowLoopId !== null) return;
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-            const path = document.getElementById('careerSquiggle');
-            const marker = document.getElementById('careerMarker');
-            if (!path || !marker) return;
+            const active = getActiveCareerPath();
+            if (!active || !active.path || !active.marker) return;
 
-            const svgWrap = document.querySelector('.career-flow-svg-wrap');
-            if (svgWrap && getComputedStyle(svgWrap).display === 'none') return;
+            stopCareerFlow();
 
+            const { path, marker, dashBase, dashRange } = active;
             const len = path.getTotalLength();
             const duration = 5200;
             let loopStart = null;
@@ -2100,7 +2779,7 @@
                 const progress = elapsed / duration;
                 const dist = progress * len;
 
-                path.style.strokeDashoffset = String(180 - progress * 170);
+                path.style.strokeDashoffset = String(dashBase - progress * dashRange);
 
                 const pt = path.getPointAtLength(dist);
                 const ahead = path.getPointAtLength(Math.min(dist + 2, len));
@@ -2112,6 +2791,14 @@
 
             careerFlowLoopId = requestAnimationFrame(frame);
         }
+
+        let careerResizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(careerResizeTimer);
+            careerResizeTimer = setTimeout(() => {
+                if (document.querySelector('.schematic-box.in')) animateCareerFlow();
+            }, 150);
+        });
 
         // contact process — auto-loop animation (no GSAP / MorphSVG / buttons)
         (function initContactProcess() {
