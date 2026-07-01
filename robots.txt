@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jigneshtiwari.netlify.app/sitemap.xml

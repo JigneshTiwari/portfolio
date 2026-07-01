@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jignesh Tiwari">
+  <rect width="64" height="64" fill="#0f1a2b"/>
+  <defs>
+    <pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse">
+      <path d="M 8 0 L 0 0 0 8" fill="none" stroke="#94a8c8" stroke-opacity="0.14" stroke-width="0.5"/>
+    </pattern>
+    <linearGradient id="brass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8bd7d"/>
+      <stop offset="100%" stop-color="#d3a25c"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" fill="url(#grid)"/>
+  <circle cx="32" cy="32" r="20" fill="none" stroke="url(#brass)" stroke-width="1.75" opacity="0.9"/>
+  <circle cx="32" cy="32" r="5.5" fill="url(#brass)"/>
+  <circle cx="24" cy="25" r="2.25" fill="#5fb8ad" opacity="0.55"/>
+  <circle cx="40" cy="38" r="1.75" fill="#d3a25c" opacity="0.35"/>
+</svg>
